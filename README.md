@@ -91,36 +91,6 @@ npm start
 
 ---
 
-## Authentication
-
-Users authenticate with their username and UUID to obtain a JWT:
-
-```http
-POST /currency-mod/login
-Content-Type: application/json
-
-{
-  "username": "Player1",
-  "uuid": "player-uuid"
-}
-```
-
-On success, you'll receive:
-
-```json
-{
-  "token": "<JWT_TOKEN>"
-}
-```
-
-This token must be included in all further requests via the `Authorization` header:
-
-```
-Authorization: Bearer <JWT_TOKEN>
-```
-
----
-
 ## API Endpoints
 
 All endpoints are prefixed under `/currency-mod`
@@ -135,6 +105,137 @@ All endpoints are prefixed under `/currency-mod`
 | GET    | /top       | Leaderboard of richest players      | Yes   | Yes       |
 | GET    | /mob-limit | Get per-mob currency drop limit     | Yes   | Yes       |
 | POST   | /daily     | Claim daily currency bonus          | Yes   | Yes       |
+
+## 📃 API Guide
+
+All routes are prefixed with `/currency-mod`. Except for `POST /currency-mod/login`, all endpoints require:
+
+- A valid JWT token passed via the `Authorization` header (`Bearer <token>`)
+- The request must originate from an allowed IP (based on your `.env` configuration)
+
+---
+
+### Authentication and Session
+
+#### `POST /currency-mod/login`
+
+**Body:**
+
+| Field | Description                        |
+| ----- | ---------------------------------- |
+| uuid  | Player’s Minecraft UUID (string)   |
+| name  | Player’s in-game username (string) |
+
+**Returns:**
+
+```json
+{
+  "token": "<JWT_TOKEN>"
+}
+```
+
+The token expires after 10 minutes. Use this token in all subsequent requests.
+
+---
+
+### Account Actions
+
+#### `GET /currency-mod/balance`
+
+Returns the authenticated player’s current balance.
+
+**Response:**
+
+```json
+{
+  "balance": <number>
+}
+```
+
+Returns `404` if the player is not found.
+
+#### `POST /currency-mod/pay`
+
+Transfers money from the authenticated user to another user.
+
+**Body:**
+
+```json
+{
+  "to_uuid": "<recipient UUID>",
+  "amount": <positive number>
+}
+```
+
+Returns `400` if amount is not positive or if sender has insufficient balance. Updates both balances atomically.
+
+#### `POST /currency-mod/deposit`
+
+Adds virtual currency to the user’s balance.
+
+**Body:**
+
+```json
+{
+  "amount": <positive number>
+}
+```
+
+Returns updated balance or `400` if invalid.
+
+#### `POST /currency-mod/withdraw`
+
+Withdraws money from the user’s balance as in-game bills.
+
+**Body:**
+
+```json
+{
+  "count": <number of bills>,
+  "denomination": <value per bill> // optional, defaults to optimized value
+}
+```
+
+Returns updated balance and bill details.
+
+---
+
+### 🎮 Game Mechanics
+
+#### `GET /currency-mod/top`
+
+Returns the top 10 richest players, ordered by balance descending.
+
+**Response:**
+
+```json
+[
+  { "name": "Player1", "balance": 12345 },
+  { "name": "Player2", "balance": 10000 }
+  ...
+]
+```
+
+---
+
+### Mob Drop Limit
+
+| Endpoint                       | Description                                                   |
+| ------------------------------ | ------------------------------------------------------------- |
+| `POST /currency-mod/mob-limit` | Marks the user as having reached the mob drop limit for today |
+| `GET /currency-mod/mob-limit`  | Returns `{ "limitReached": true/false }`                      |
+
+---
+
+### Daily Reward
+
+#### `POST /currency-mod/daily`
+
+Allows the user to claim a once-daily reward.
+
+- Checks whether the user already claimed it after the last reset time (default 06:30 CET)
+- Either credits the reward or tells the user how long to wait until the next reset
+- Updates user balance and daily rewards tracking on success
 
 ---
 
