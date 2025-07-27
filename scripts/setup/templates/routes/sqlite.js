@@ -63,7 +63,7 @@ export default function currencyRoutes(db) {
         return res.status(404).json({ error: "Player not found" });
       }
 
-      const balance = Math.floor(parseFloat(row.balance));
+      const balance = row.balance;
       res.json({ balance });
     } catch (error) {
       logger.error(`/currency/balance error: ${error}`);
@@ -102,7 +102,7 @@ export default function currencyRoutes(db) {
         throw new Error("Sender not found");
       }
 
-      const senderBalance = Math.floor(parseFloat(senderRow.balance));
+      const senderBalance = senderRow.balance;
       if (senderBalance < amount) {
         throw new Error("Insufficient funds");
       }
@@ -166,7 +166,7 @@ export default function currencyRoutes(db) {
         }
 
         const userRow = selectBalance.get(uuid);
-        const newBalance = Math.floor(parseFloat(userRow.balance));
+        const newBalance = userRow.balance;
 
         logTransactions(db, {
           uuid,
@@ -211,7 +211,7 @@ export default function currencyRoutes(db) {
         const userRow = selectStmt.get(uuid);
         if (!userRow) throw new Error("User not found");
 
-        const currentBalance = Math.floor(parseFloat(userRow.balance));
+        const currentBalance = userRow.balance;
         if (currentBalance < amount) throw new Error("Insufficient funds");
 
         const updateStmt = db.prepare(
@@ -261,7 +261,7 @@ export default function currencyRoutes(db) {
 
       const top = rows.map((r) => ({
         name: r.name,
-        balance: Math.floor(parseFloat(r.balance)),
+        balance: r.balance,
       }));
 
       res.json(top);
@@ -363,7 +363,7 @@ export default function currencyRoutes(db) {
         return res.status(404).json({ error: "User not found." });
       }
 
-      const currentBal = Math.floor(parseFloat(userRow.balance));
+      const currentBal = userRow.balance;
 
       const rewardStmt = db.prepare(
         `SELECT last_claim_at FROM daily_rewards WHERE uuid = ?`
