@@ -355,19 +355,6 @@ export default function currencyRoutes(db) {
     const lastReset = getLastReset(now);
 
     try {
-      const userLinkStmt = db.prepare(
-        `SELECT discord_id FROM users WHERE uuid = ?`
-      );
-      const userLink = userLinkStmt.get(uuid);
-
-      if (!userLink) {
-        return res
-          .status(404)
-          .json({ error: "Your Minecraft account is not linked to Discord." });
-      }
-
-      const discordId = userLink.discord_id;
-
       const userBalStmt = db.prepare(
         `SELECT balance FROM user_funds WHERE uuid = ?`
       );
@@ -379,9 +366,9 @@ export default function currencyRoutes(db) {
       const currentBal = Math.floor(parseFloat(userRow.balance));
 
       const rewardStmt = db.prepare(
-        `SELECT last_claim_at FROM daily_rewards WHERE discord_id = ?`
+        `SELECT last_claim_at FROM daily_rewards WHERE uuid = ?`
       );
-      const rewardRow = rewardStmt.get(discordId);
+      const rewardRow = rewardStmt.get(uuid);
 
       const alreadyClaimed =
         rewardRow &&
@@ -405,11 +392,11 @@ export default function currencyRoutes(db) {
       updateBalStmt.run(DAILY_REWARD_AMOUNT, uuid);
 
       const upsertRewardStmt = db.prepare(`
-      INSERT INTO daily_rewards (discord_id, last_claim_at)
+      INSERT INTO daily_rewards (uuid, last_claim_at)
       VALUES (?, ?)
-      ON CONFLICT(discord_id) DO UPDATE SET last_claim_at = excluded.last_claim_at
+      ON CONFLICT(uuid) DO UPDATE SET last_claim_at = excluded.last_claim_at
     `);
-      upsertRewardStmt.run(discordId, now.toSQL());
+      upsertRewardStmt.run(uuid, now.toSQL());
 
       const newBalance = currentBal + DAILY_REWARD_AMOUNT;
       const formatted = newBalance.toLocaleString("en-US");

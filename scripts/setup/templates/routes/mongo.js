@@ -381,18 +381,8 @@ export default function currencyRoutes(db) {
     const lastReset = getLastReset(now);
 
     try {
-      const users = db.collection("users");
       const userFunds = db.collection("user_funds");
       const dailyRewards = db.collection("daily_rewards");
-
-      const user = await users.findOne({ uuid });
-      if (!user || !user.discord_id) {
-        return res.status(404).json({
-          error: "Your Minecraft account is not linked to Discord.",
-        });
-      }
-
-      const discordId = user.discord_id;
 
       const fund = await userFunds.findOne({ uuid });
       if (!fund) {
@@ -401,7 +391,7 @@ export default function currencyRoutes(db) {
 
       const currentBal = Math.floor(fund.balance || 0);
 
-      const reward = await dailyRewards.findOne({ discord_id: discordId });
+      const reward = await dailyRewards.findOne({ uuid });
 
       const alreadyClaimed =
         reward &&
@@ -428,7 +418,7 @@ export default function currencyRoutes(db) {
         );
 
         await dailyRewards.updateOne(
-          { discord_id: discordId },
+          { uuid },
           { $set: { last_claim_at: now.toJSDate() } },
           { upsert: true, session }
         );

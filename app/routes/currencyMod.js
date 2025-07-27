@@ -362,23 +362,10 @@ export default function currencyRoutes(db) {
     };
 
     const lastReset = getLastReset(now);
-
     const client = await db.connect();
+
     try {
       await client.query("BEGIN");
-
-      const linkRes = await client.query(
-        `SELECT discord_id FROM users WHERE uuid = $1 LIMIT 1`,
-        [uuid]
-      );
-      if (linkRes.rowCount === 0) {
-        await client.query("ROLLBACK");
-        return res
-          .status(404)
-          .json({ error: "Your Minecraft account is not linked to Discord." });
-      }
-
-      const discordId = linkRes.rows[0].discord_id;
 
       const userRes = await client.query(
         `SELECT balance FROM user_funds WHERE uuid = $1 FOR UPDATE`,
@@ -392,8 +379,8 @@ export default function currencyRoutes(db) {
       const currentBal = Math.floor(parseFloat(userRes.rows[0].balance));
 
       const rewardRes = await client.query(
-        `SELECT last_claim_at FROM daily_rewards WHERE discord_id = $1 FOR UPDATE`,
-        [discordId]
+        `SELECT last_claim_at FROM daily_rewards WHERE uuid = $1 FOR UPDATE`,
+        [uuid]
       );
 
       const alreadyClaimed =
@@ -420,10 +407,10 @@ export default function currencyRoutes(db) {
         [DAILY_REWARD_AMOUNT, uuid]
       );
       await client.query(
-        `INSERT INTO daily_rewards (discord_id, last_claim_at)
-         VALUES ($1, $2)
-         ON CONFLICT (discord_id) DO UPDATE SET last_claim_at = EXCLUDED.last_claim_at`,
-        [discordId, now.toJSDate()]
+        `INSERT INTO daily_rewards (uuid, last_claim_at)
+       VALUES ($1, $2)
+       ON CONFLICT (uuid) DO UPDATE SET last_claim_at = EXCLUDED.last_claim_at`,
+        [uuid, now.toJSDate()]
       );
 
       await client.query("COMMIT");
