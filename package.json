@@ -20,6 +20,9 @@
   "homepage": "https://github.com/matejhozlar/createrington-nodejs-backend#readme",
   "dependencies": {
     "cors": "^2.8.5",
-    "express": "^4.21.2"
+    "dotenv": "^17.2.1",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "luxon": "^3.7.1"
   }
 }
