@@ -132,8 +132,7 @@ See `db/index.js` for the pool setup.
 
 ## Logging
 
-The backend uses `pino` for structured JSON logging. Logs include request details, IPs, status codes, etc.
-See `logger.js` for customization.
+The backend uses a custom Winston logger. Logs are saved in a `logs` directory inside a folder named after the current date. Each day at midnight the logger rotates to a new folder and cleans up old folders after a retention period. The logger writes separate files for server logs, error logs and exception logs and also outputs to the console. See `logger.js` for implementation details.
 
 ---
 
