@@ -190,12 +190,6 @@ MIT
 
 ---
 
-## Maintainer
-
-Developed by [matejhozlar](https://github.com/matejhozlar)
-
----
-
 ## Contributions
 
 Feel free to fork, PR, or suggest improvements!
