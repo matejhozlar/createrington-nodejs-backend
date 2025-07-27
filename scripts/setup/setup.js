@@ -50,15 +50,15 @@ function findEnvVarsInFile(filePath) {
 function applyDatabaseTemplate(selectedDb) {
   const filesToReplace = [
     {
-      src: `templates/db/${selectedDb}.js`,
+      src: `/scripts/setup/templates/db/${selectedDb}.js`,
       dest: `db/index.js`,
     },
     {
-      src: `templates/routes/${selectedDb}.js`,
+      src: `/scrits/setup/templates/routes/${selectedDb}.js`,
       dest: `app/routes/currencyMod.js`,
     },
     {
-      src: `templates/utils/${selectedDb}.js`,
+      src: `/scripts/setup/templates/utils/${selectedDb}.js`,
       dest: `app/utils/logTransactions.js`,
     },
   ];
