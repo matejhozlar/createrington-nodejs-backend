@@ -54,7 +54,7 @@ function applyDatabaseTemplate(selectedDb) {
       dest: `db/index.js`,
     },
     {
-      src: `scrits/setup/templates/routes/${selectedDb}.js`,
+      src: `scripts/setup/templates/routes/${selectedDb}.js`,
       dest: `app/routes/currencyMod.js`,
     },
     {

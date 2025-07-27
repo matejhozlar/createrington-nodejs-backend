@@ -35,7 +35,7 @@ try {
   await db.query("SELECT 1");
   logger.info("Connected to PostgreSQL database");
 } catch (error) {
-  logger.error(`❌ Failed to connect to DB: ${error}`);
+  logger.error(`Failed to connect to DB: ${error}`);
   process.exit(1);
 }
 
