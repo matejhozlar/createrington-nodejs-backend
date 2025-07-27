@@ -8,7 +8,7 @@ import cors from "cors";
 import currencyRoutes from "./routes/currencyMod.js";
 
 // Import PostgreSQL database instance (connection pool)
-import db from "../db/index.js";
+import { db } from "../db/index.js";
 
 // Create an Express application instance
 const app = express();
