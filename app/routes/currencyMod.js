@@ -65,8 +65,7 @@ export default function currencyRoutes(db) {
         return res.status(404).json({ error: "Player not found" });
       }
 
-      const rawBal = result.rows[0].balance;
-      const balance = Math.floor(parseFloat(rawBal));
+      const balance = result.rows[0].balance;
       res.json({ balance });
     } catch (error) {
       logger.error(`/currency/balance error: ${error}`);
@@ -106,8 +105,7 @@ export default function currencyRoutes(db) {
         throw new Error("Sender not found");
       }
 
-      const rawSender = senderRes.rows[0].balance;
-      const senderBalance = Math.floor(parseFloat(rawSender));
+      const senderBalance = senderRes.rows[0].balance;
 
       const newSenderBal = senderBalance - amount;
 
@@ -176,7 +174,7 @@ export default function currencyRoutes(db) {
         return res.status(404).json({ error: "User not found" });
       }
 
-      const newBalance = Math.floor(parseFloat(result.rows[0].balance));
+      const newBalance = result.rows[0].balance;
 
       await client.query("COMMIT");
       await logTransactions(db, {
@@ -224,7 +222,7 @@ export default function currencyRoutes(db) {
 
       if (result.rows.length === 0) throw new Error("User not found");
 
-      const currentBalance = Math.floor(parseFloat(result.rows[0].balance));
+      const currentBalance = result.rows[0].balance;
       if (currentBalance < amount) throw new Error("Insufficient funds");
 
       const updateRes = await client.query(
@@ -234,7 +232,7 @@ export default function currencyRoutes(db) {
 
       await client.query("COMMIT");
 
-      const newBalance = Math.floor(parseFloat(updateRes.rows[0].balance));
+      const newBalance = updateRes.rows[0].balance;
 
       await logTransactions(db, {
         uuid,
@@ -273,7 +271,7 @@ export default function currencyRoutes(db) {
 
       const top = result.rows.map((r) => ({
         name: r.name,
-        balance: Math.floor(parseFloat(r.balance)),
+        balance: r.balance,
       }));
 
       res.json(top);
@@ -376,7 +374,7 @@ export default function currencyRoutes(db) {
         return res.status(404).json({ error: "User not found." });
       }
 
-      const currentBal = Math.floor(parseFloat(userRes.rows[0].balance));
+      const currentBal = userRes.rows[0].balance;
 
       const rewardRes = await client.query(
         `SELECT last_claim_at FROM daily_rewards WHERE uuid = $1 FOR UPDATE`,
