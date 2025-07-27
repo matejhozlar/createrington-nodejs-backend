@@ -148,7 +148,7 @@ Returns the authenticated player’s current balance.
 
 ```json
 {
-  "balance": <number>
+  "balance": "<number>"
 }
 ```
 
@@ -163,7 +163,7 @@ Transfers money from the authenticated user to another user.
 ```json
 {
   "to_uuid": "<recipient UUID>",
-  "amount": <positive number>
+  "amount": "<positive number>"
 }
 ```
 
@@ -177,7 +177,7 @@ Adds virtual currency to the user’s balance.
 
 ```json
 {
-  "amount": <positive number>
+  "amount": "<positive number>"
 }
 ```
 
@@ -191,8 +191,8 @@ Withdraws money from the user’s balance as in-game bills.
 
 ```json
 {
-  "count": <number of bills>,
-  "denomination": <value per bill> // optional, defaults to optimized value
+  "count": "<number of bills>",
+  "denomination": "<value per bill>" // optional
 }
 ```
 
