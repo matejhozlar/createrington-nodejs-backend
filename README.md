@@ -35,13 +35,27 @@ npm install
 
 ### 3. Set Up Environment Variables
 
-Use the provided generator script:
+Generate a `.env.example` file listing all required keys:
 
 ```bash
-npm run gen:env-vars
+npm run env:generate-example
 ```
 
-Or manually create a `.env` file:
+Then copy it to create your actual environment config:
+
+```bash
+cp .env.example .env
+```
+
+After configuring your `.env`, scan the codebase and export all required environment variables for validation:
+
+```bash
+npm run env:scan-and-export
+```
+
+This will populate `config/env/vars/requiredVars.js`, which is used to validate your environment variables at server startup.
+
+Example `.env` file:
 
 ```ini
 NODE_ENV=development
