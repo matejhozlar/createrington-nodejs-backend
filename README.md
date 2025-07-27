@@ -93,7 +93,7 @@ npm start
 
 ## API Endpoints
 
-All endpoints are prefixed under `/currency-mod`
+All endpoints are prefixed under `/currency`
 
 | Method | Endpoint   | Description                         | Auth? | IP Check? |
 | ------ | ---------- | ----------------------------------- | ----- | --------- |
@@ -108,7 +108,7 @@ All endpoints are prefixed under `/currency-mod`
 
 ## 📃 API Guide
 
-All routes are prefixed with `/currency-mod`. Except for `POST /currency-mod/login`, all endpoints require:
+All routes are prefixed with `/currency`. Except for `POST /currency/login`, all endpoints require:
 
 - A valid JWT token passed via the `Authorization` header (`Bearer <token>`)
 - The request must originate from an allowed IP (based on your `.env` configuration)
@@ -117,7 +117,7 @@ All routes are prefixed with `/currency-mod`. Except for `POST /currency-mod/log
 
 ### Authentication and Session
 
-#### `POST /currency-mod/login`
+#### `POST /currency/login`
 
 **Body:**
 
@@ -140,7 +140,7 @@ The token expires after 10 minutes. Use this token in all subsequent requests.
 
 ### Account Actions
 
-#### `GET /currency-mod/balance`
+#### `GET /currency/balance`
 
 Returns the authenticated player’s current balance.
 
@@ -154,7 +154,7 @@ Returns the authenticated player’s current balance.
 
 Returns `404` if the player is not found.
 
-#### `POST /currency-mod/pay`
+#### `POST /currency/pay`
 
 Transfers money from the authenticated user to another user.
 
@@ -169,7 +169,7 @@ Transfers money from the authenticated user to another user.
 
 Returns `400` if amount is not positive or if sender has insufficient balance. Updates both balances atomically.
 
-#### `POST /currency-mod/deposit`
+#### `POST /currency/deposit`
 
 Adds virtual currency to the user’s balance.
 
@@ -183,7 +183,7 @@ Adds virtual currency to the user’s balance.
 
 Returns updated balance or `400` if invalid.
 
-#### `POST /currency-mod/withdraw`
+#### `POST /currency/withdraw`
 
 Withdraws money from the user’s balance as in-game bills.
 
@@ -202,7 +202,7 @@ Returns updated balance and bill details.
 
 ### 🎮 Game Mechanics
 
-#### `GET /currency-mod/top`
+#### `GET /currency/top`
 
 Returns the top 10 richest players, ordered by balance descending.
 
@@ -220,16 +220,16 @@ Returns the top 10 richest players, ordered by balance descending.
 
 ### Mob Drop Limit
 
-| Endpoint                       | Description                                                   |
-| ------------------------------ | ------------------------------------------------------------- |
-| `POST /currency-mod/mob-limit` | Marks the user as having reached the mob drop limit for today |
-| `GET /currency-mod/mob-limit`  | Returns `{ "limitReached": true/false }`                      |
+| Endpoint                   | Description                                                   |
+| -------------------------- | ------------------------------------------------------------- |
+| `POST /currency/mob-limit` | Marks the user as having reached the mob drop limit for today |
+| `GET /currency/mob-limit`  | Returns `{ "limitReached": true/false }`                      |
 
 ---
 
 ### Daily Reward
 
-#### `POST /currency-mod/daily`
+#### `POST /currency/daily`
 
 Allows the user to claim a once-daily reward.
 
