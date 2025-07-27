@@ -7,6 +7,8 @@ This repository provides a **Node.js backend template** for the **Createrington 
 The backend exposes a simple HTTP API that the mod can call for authentication and currency‑related actions.
 It is designed to be easy to deploy and integrate: clone the repository, configure the environment variables, run the server and the mod will be able to communicate with it immediately.
 
+This project serves as a backend template for [Createrington Currency Mod](https://github.com/matejhozlar/createrington-currency)
+
 ---
 
 ## Table of contents
