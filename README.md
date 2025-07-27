@@ -393,6 +393,54 @@ db.currency_transactions.createIndex({ uuid: 1 });
 db.user_funds.createIndex({ balance: -1 }); // For top balances
 ```
 
+### SQLite Schema Setup
+
+```sql
+-- Enable foreign key enforcement (important in SQLite)
+PRAGMA foreign_keys = ON;
+
+-- Main user table
+CREATE TABLE IF NOT EXISTS user_funds (
+  uuid TEXT PRIMARY KEY, -- UUID as TEXT in SQLite
+  name TEXT NOT NULL,
+  balance INTEGER NOT NULL DEFAULT 0
+);
+
+-- Daily rewards table, references user_funds
+CREATE TABLE IF NOT EXISTS daily_rewards (
+  uuid TEXT PRIMARY KEY,
+  last_claim_at TEXT NOT NULL, -- Store timestamps as ISO8601 strings
+  FOREIGN KEY (uuid) REFERENCES user_funds(uuid) ON DELETE CASCADE
+);
+
+-- Mob limit tracking table, references user_funds
+CREATE TABLE IF NOT EXISTS mob_limit_reached (
+  uuid TEXT PRIMARY KEY,
+  date_reached TEXT NOT NULL, -- Store date as TEXT (ISO8601)
+  FOREIGN KEY (uuid) REFERENCES user_funds(uuid) ON DELETE CASCADE
+);
+
+-- Transaction log table, references user_funds
+CREATE TABLE IF NOT EXISTS currency_transactions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  uuid TEXT NOT NULL,
+  action TEXT NOT NULL,             -- e.g., "deposit", "withdraw", "pay"
+  amount INTEGER NOT NULL,
+  from_uuid TEXT,
+  to_uuid TEXT,
+  denomination INTEGER,
+  count INTEGER,
+  balance_after INTEGER,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  FOREIGN KEY (uuid) REFERENCES user_funds(uuid) ON DELETE CASCADE,
+  FOREIGN KEY (from_uuid) REFERENCES user_funds(uuid) ON DELETE SET NULL,
+  FOREIGN KEY (to_uuid) REFERENCES user_funds(uuid) ON DELETE SET NULL
+);
+
+-- Optional: Index for leaderboard
+CREATE INDEX IF NOT EXISTS idx_user_funds_balance ON user_funds (balance DESC);
+```
+
 ---
 
 ## Logging
