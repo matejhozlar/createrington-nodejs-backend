@@ -19,7 +19,7 @@ async function promptDatabaseChoice() {
       choices: [
         { name: "PostgreSQL", value: "postgres" },
         { name: "SQLite", value: "sqlite" },
-        { name: "MongoDB", value: "mongo" },
+        { name: "MongoDB (beta – untested)", value: "mongo" },
       ],
     },
   ]);
