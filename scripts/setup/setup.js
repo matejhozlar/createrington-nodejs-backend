@@ -73,7 +73,6 @@ function applyDatabaseTemplate(selectedDb) {
     }
 
     fs.copyFileSync(sourcePath, destPath);
-    console.log(`✅ Copied: ${src} → ${dest}`);
   }
 }
 
