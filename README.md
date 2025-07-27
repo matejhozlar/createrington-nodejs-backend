@@ -106,7 +106,7 @@ All endpoints are prefixed under `/currency`
 | GET    | /mob-limit | Get per-mob currency drop limit     | Yes   | Yes       |
 | POST   | /daily     | Claim daily currency bonus          | Yes   | Yes       |
 
-## 📃 API Guide
+## API Guide
 
 All routes are prefixed with `/currency`. Except for `POST /currency/login`, all endpoints require:
 
@@ -200,7 +200,7 @@ Returns updated balance and bill details.
 
 ---
 
-### 🎮 Game Mechanics
+### Game Mechanics
 
 #### `GET /currency/top`
 
