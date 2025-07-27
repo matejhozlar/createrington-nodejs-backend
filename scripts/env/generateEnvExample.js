@@ -28,12 +28,11 @@ function findEnvVarsInFile(filePath) {
 }
 
 /**
- * Scans all `.js` files in the project, collects all referenced `process.env.VAR`
- * variables, and writes them to a JS module as an array export.
+ * Generates a .env.example file listing all required environment variables.
  *
- * @param {string} outputPath - Path where the result JS file should be written.
+ * @param {string} outputPath - The path where the .env.example will be written.
  */
-function generateRequiredEnvVars(outputPath) {
+function generateDotenvExample(outputPath) {
   const allFiles = glob.sync(["**/*.js"], {
     cwd: SOURCE_DIR,
     ignore: ["node_modules/**", "client/**", "build/**", "dist/**", "index.js"],
@@ -52,16 +51,14 @@ function generateRequiredEnvVars(outputPath) {
   }
 
   const sortedVars = Array.from(envVars).sort();
+  const lines = sortedVars.map((v) => `${v}=`);
+  const dotenvContent = lines.join("\n") + "\n";
 
-  const jsContent = `const REQUIRED_VARS = [\n${sortedVars
-    .map((v) => `  "${v}",`)
-    .join("\n")}\n];\n\nexport default REQUIRED_VARS;\n`;
-
-  fs.writeFileSync(outputPath, jsContent);
-  console.log(`Wrote ${sortedVars.length} required env vars to ${outputPath}`);
+  fs.writeFileSync(outputPath, dotenvContent);
+  console.log(`Wrote ${sortedVars.length} vars to ${outputPath}`);
   process.exit(0);
 }
 
-// Execute immediately
-const outputPath = path.resolve("config/env/vars/requiredVars.js");
-generateRequiredEnvVars(outputPath);
+// Run it
+const outputPath = path.resolve(".env.example");
+generateDotenvExample(outputPath);

@@ -8,7 +8,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "gen:env-vars": "node scripts/env/generate.js"
+    "env:scan-and-export": "node scripts/env/generateRequiredEnvVars.js",
+    "env:generate-example": "node scripts/env/generateEnvExample.js"
   },
   "repository": {
     "type": "git",
