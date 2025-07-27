@@ -48,7 +48,6 @@ It is designed to be easy to deploy and integrate: clone the repository, configu
 <p align="center">
   <img src="https://skillicons.dev/icons?i=nodejs,postgres,express,js" />
 </p>
----
 
 ---
 
