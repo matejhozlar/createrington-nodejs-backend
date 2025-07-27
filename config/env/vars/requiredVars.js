@@ -1,0 +1,13 @@
+const REQUIRED_VARS = [
+  "ALLOWED_IP_ADDRESS",
+  "ALLOWED_IP_ADDRESS_LOCAL",
+  "DB_DATABASE",
+  "DB_HOST",
+  "DB_PASSWORD",
+  "DB_PORT",
+  "DB_USER",
+  "JWT_SECRET",
+  "PORT",
+];
+
+export default REQUIRED_VARS;
