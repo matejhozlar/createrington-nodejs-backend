@@ -23,10 +23,6 @@ It is designed to be easy to deploy and integrate: clone the repository, configu
 
 # Createrington Node.js Backend Template
 
-<p align="center">
-  <img src="https://skillicons.dev/icons?i=nodejs,postgres,express,js" />
-</p>
-
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-DB-336791?logo=postgresql)
 ![Node.js](https://img.shields.io/badge/Node.js-22-green?logo=node.js&logoColor=white)
 
