@@ -9,6 +9,25 @@ It is designed to be easy to deploy and integrate: clone the repository, configu
 
 ---
 
+## Table of contents
+
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Installation & Setup](#installation--setup)
+- [Project Structure](#project-structure)
+- [API Endpoints](#api-endpoints)
+- [API Guide](#api-guide)
+- [Database](#database)
+- [Logging](#logging)
+- [Security](#security)
+- [Scripts](#scripts)
+- [Recommended](#recommended)
+- [Example Usage](#example-usage)
+- [License](#license)
+- [Support](#support)
+
+---
+
 ## Features
 
 - JWT-based authentication
@@ -18,17 +37,6 @@ It is designed to be easy to deploy and integrate: clone the repository, configu
 - Environment variable validation
 - Includes API for user login, balance checks, payments, and more
 - Modular project structure ready for production
-
----
-
-# Createrington Node.js Backend Template
-
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-DB-336791?logo=postgresql)
-![Node.js](https://img.shields.io/badge/Node.js-22-green?logo=node.js&logoColor=white)
-
-This repository provides a **Node.js backend template** for the **Createrington Currency** Minecraft mod.
-The backend exposes a simple HTTP API that the mod can call for authentication and currency‑related actions.
-It is designed to be easy to deploy and integrate: clone the repository, configure the environment variables, run the server and the mod will be able to communicate with it immediately.
 
 ---
 
