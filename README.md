@@ -280,10 +280,118 @@ Allows the user to claim a once-daily reward.
 
 ## Database
 
-You need a PostgreSQL database with tables like `users`, `transactions`, `items`, `daily_rewards`, etc.
-Connection is handled via the `DATABASE_URL` in your `.env` file.
+This project currently supports the following database engines:
 
-See `db/index.js` for the pool setup.
+- **PostgreSQL** – Fully supported and tested
+- **SQLite** – Fully supported and tested
+- **MongoDB** – Supported (beta), but not yet fully tested
+
+If you wish to use a different database system, you will need to implement the corresponding integration logic manually.
+
+### PostgreSQL Schema Setup
+
+```sql
+-- Main user table
+CREATE TABLE IF NOT EXISTS user_funds (
+  uuid UUID PRIMARY KEY,
+  name TEXT NOT NULL,
+  balance INTEGER NOT NULL DEFAULT 0
+);
+
+-- Daily rewards table, references user_funds
+CREATE TABLE IF NOT EXISTS daily_rewards (
+  uuid UUID PRIMARY KEY,
+  last_claim_at TIMESTAMPTZ NOT NULL,
+  CONSTRAINT fk_daily_rewards_user FOREIGN KEY (uuid) REFERENCES user_funds(uuid) ON DELETE CASCADE
+);
+
+-- Mob limit tracking table, references user_funds
+CREATE TABLE IF NOT EXISTS mob_limit_reached (
+  uuid UUID PRIMARY KEY,
+  date_reached DATE NOT NULL,
+  CONSTRAINT fk_mob_limit_user FOREIGN KEY (uuid) REFERENCES user_funds(uuid) ON DELETE CASCADE
+);
+
+-- Transaction log table, references user_funds (nullable foreign keys for from_uuid/to_uuid)
+CREATE TABLE IF NOT EXISTS currency_transactions (
+  id SERIAL PRIMARY KEY,
+  uuid UUID NOT NULL,
+  action TEXT NOT NULL,             -- e.g., "deposit", "withdraw", "pay"
+  amount INTEGER NOT NULL,
+  from_uuid UUID,
+  to_uuid UUID,
+  denomination INTEGER,
+  count INTEGER,
+  balance_after INTEGER,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_transaction_user FOREIGN KEY (uuid) REFERENCES user_funds(uuid) ON DELETE CASCADE,
+  CONSTRAINT fk_transaction_from FOREIGN KEY (from_uuid) REFERENCES user_funds(uuid) ON DELETE SET NULL,
+  CONSTRAINT fk_transaction_to FOREIGN KEY (to_uuid) REFERENCES user_funds(uuid) ON DELETE SET NULL
+);
+
+-- Optional: Speed up balance leaderboard queries
+CREATE INDEX IF NOT EXISTS idx_user_funds_balance ON user_funds (balance DESC);
+```
+
+### MongoDB Schema Setup
+
+Since MongoDB is schema-less, you don't strictly need to define schemas, but for consistency and maintainability, especially if using Mongoose or similar ODMs, you can define them in code or document their structure like this:
+
+`user_funds`:
+
+```json
+{
+  "uuid": "string (UUID)",
+  "name": "string",
+  "balance": "number"
+}
+```
+
+`daily_rewards`:
+
+```json
+{
+  "uuid": "string (UUID)", // References user_funds.uuid
+  "last_claim_at": "ISODate"
+}
+```
+
+`mob_limit_reached`:
+
+```json
+{
+  "uuid": "string (UUID)", // References user_funds.uuid
+  "date_reached": "ISODate" // Should be date-only (no time)
+}
+```
+
+`currency_transactions`:
+
+```json
+{
+  "uuid": "string (UUID)", // The user initiating the action
+  "action": "string", // e.g., "deposit", "withdraw", "pay"
+  "amount": "number",
+  "from_uuid": "string (UUID)", // Nullable, for transfers
+  "to_uuid": "string (UUID)", // Nullable, for transfers
+  "denomination": "number", // Optional
+  "count": "number", // Optional
+  "balance_after": "number", // Balance after the operation
+  "created_at": "ISODate" // Auto-generated timestamp
+}
+```
+
+#### Index Recommendations
+
+Although MongoDB doesn't enforce foreign key constraints, indexes can help enforce uniqueness and performance:
+
+```js
+db.user_funds.createIndex({ uuid: 1 }, { unique: true });
+db.daily_rewards.createIndex({ uuid: 1 }, { unique: true });
+db.mob_limit_reached.createIndex({ uuid: 1 }, { unique: true });
+db.currency_transactions.createIndex({ uuid: 1 });
+db.user_funds.createIndex({ balance: -1 }); // For top balances
+```
 
 ---
 
