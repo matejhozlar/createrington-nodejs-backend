@@ -10,9 +10,22 @@ import verifyIP from "../middleware/verifyIP.js";
 // utils
 import { logTransactions } from "../utils/currency/logTransactions.js";
 
+/**
+ * Sets up currency-related API routes (authentication, balance, payments, etc.)
+ *
+ * @param {import('pg').Pool} db - PostgreSQL DB client or pool.
+ * @returns {import('express').Router} Express router with currency routes.
+ */
 export default function currencyRoutes(db) {
   const router = express.Router();
 
+  /**
+   * POST /currency/login
+   * Authenticates a user and returns a short-lived JWT.
+   * @body {string} uuid - Minecraft player's UUID.
+   * @body {string} name - Minecraft username.
+   * @returns {string} token
+   */
   router.post("/currency/login", (req, res) => {
     const { uuid, name } = req.body;
 
@@ -27,10 +40,14 @@ export default function currencyRoutes(db) {
     res.json({ token });
   });
 
+  // Protect all /currency/* routes with auth + IP check
   router.use("/currency", verifyJWT);
   router.use("/currency", verifyIP);
 
-  // --- /api/currency/balance ---
+  /**
+   * GET /currency/balance
+   * Returns the player's current balance.
+   */
   router.get("/currency/balance", async (req, res) => {
     const uuid = req.user.uuid;
 
@@ -57,7 +74,12 @@ export default function currencyRoutes(db) {
     }
   });
 
-  // --- /api/currency/pay ---
+  /**
+   * POST /currency/pay
+   * Sends money from one player to another.
+   * @body {string} to_uuid - UUID of the recipient.
+   * @body {number} amount - Amount to transfer.
+   */
   router.post("/currency/pay", async (req, res) => {
     const { to_uuid, amount } = req.body;
     const from_uuid = req.user.uuid;
@@ -121,13 +143,17 @@ export default function currencyRoutes(db) {
     } catch (error) {
       await client.query("ROLLBACK");
       logger.error(`/currency/send error: ${error}`);
-      res.status(400).json({ error: error });
+      res.status(400).json({ error: error.message });
     } finally {
       client.release();
     }
   });
 
-  // --- /api/currency/deposit ---
+  /**
+   * POST /currency/deposit
+   * Converts physical in-game currency to digital balance.
+   * @body {number} amount - Amount to deposit.
+   */
   router.post("/currency/deposit", async (req, res) => {
     const { amount } = req.body;
     const uuid = req.user.uuid;
@@ -150,8 +176,7 @@ export default function currencyRoutes(db) {
         return res.status(404).json({ error: "User not found" });
       }
 
-      const rawNew = result.rows[0].balance;
-      const newBalance = Math.floor(parseFloat(rawNew));
+      const newBalance = Math.floor(parseFloat(result.rows[0].balance));
 
       await client.query("COMMIT");
       await logTransactions(db, {
@@ -164,13 +189,18 @@ export default function currencyRoutes(db) {
     } catch (error) {
       await client.query("ROLLBACK");
       logger.error(`/currency/deposit error: ${error}`);
-      res.status(400).json({ error: error });
+      res.status(400).json({ error: error.message });
     } finally {
       client.release();
     }
   });
 
-  // --- /api/currency/withdraw ---
+  /**
+   * POST /currency/withdraw
+   * Withdraws virtual money into physical bills.
+   * @body {number} count - Number of bills to withdraw.
+   * @body {number} [denomination=1000] - Optional denomination per bill.
+   */
   router.post("/currency/withdraw", async (req, res) => {
     const { count, denomination } = req.body;
     const uuid = req.user.uuid;
@@ -191,28 +221,20 @@ export default function currencyRoutes(db) {
         `SELECT balance FROM user_funds WHERE uuid = $1 FOR UPDATE`,
         [uuid]
       );
-      if (result.rows.length === 0) {
-        throw new Error("User not found");
-      }
 
-      const rawBal = result.rows[0].balance;
-      const currentBalance = Math.floor(parseFloat(rawBal));
-      if (currentBalance < amount) {
-        throw new Error("Insufficient funds");
-      }
+      if (result.rows.length === 0) throw new Error("User not found");
+
+      const currentBalance = Math.floor(parseFloat(result.rows[0].balance));
+      if (currentBalance < amount) throw new Error("Insufficient funds");
 
       const updateRes = await client.query(
-        `UPDATE user_funds
-         SET balance = balance - $1
-       WHERE uuid = $2
-       RETURNING balance`,
+        `UPDATE user_funds SET balance = balance - $1 WHERE uuid = $2 RETURNING balance`,
         [amount, uuid]
       );
 
       await client.query("COMMIT");
 
-      const rawAfter = updateRes.rows[0].balance;
-      const newBalance = Math.floor(parseFloat(rawAfter));
+      const newBalance = Math.floor(parseFloat(updateRes.rows[0].balance));
 
       await logTransactions(db, {
         uuid,
@@ -228,18 +250,21 @@ export default function currencyRoutes(db) {
         withdrawn: amount,
         new_balance: newBalance,
         denomination: denom,
-        count: count,
+        count,
       });
     } catch (error) {
       await client.query("ROLLBACK");
       logger.error(`/currency/withdraw error: ${error}`);
-      res.status(400).json({ error: error });
+      res.status(400).json({ error: error.message });
     } finally {
       client.release();
     }
   });
 
-  // --- /api/currency/top ---
+  /**
+   * GET /currency/top
+   * Returns top 10 richest players by balance.
+   */
   router.get("/currency/top", async (req, res) => {
     try {
       const result = await db.query(
@@ -258,7 +283,10 @@ export default function currencyRoutes(db) {
     }
   });
 
-  // --- /api/currency/mob-limit ---
+  /**
+   * POST /currency/mob-limit
+   * Marks a user as having reached their mob drop limit for the day.
+   */
   router.post("/currency/mob-limit", async (req, res) => {
     const uuid = req.user.uuid;
 
@@ -269,8 +297,8 @@ export default function currencyRoutes(db) {
     try {
       await db.query(
         `INSERT INTO mob_limit_reached (uuid, date_reached) 
-       VALUES ($1, CURRENT_DATE)
-       ON CONFLICT (uuid) DO UPDATE SET date_reached = CURRENT_DATE`,
+         VALUES ($1, CURRENT_DATE)
+         ON CONFLICT (uuid) DO UPDATE SET date_reached = CURRENT_DATE`,
         [uuid]
       );
 
@@ -281,7 +309,10 @@ export default function currencyRoutes(db) {
     }
   });
 
-  // --- /api/currency/mob-limit GET (check limit)
+  /**
+   * GET /currency/mob-limit
+   * Checks if a user has reached their mob drop limit for the day.
+   */
   router.get("/currency/mob-limit", async (req, res) => {
     const uuid = req.user.uuid;
 
@@ -304,7 +335,10 @@ export default function currencyRoutes(db) {
     }
   });
 
-  // --- /api/currency/daily ---
+  /**
+   * POST /currency/daily
+   * Allows a user to claim a once-daily reward.
+   */
   router.post("/currency/daily", async (req, res) => {
     const uuid = req.user.uuid;
 
@@ -323,9 +357,7 @@ export default function currencyRoutes(db) {
         second: 0,
         millisecond: 0,
       });
-      if (now < resetTime) {
-        resetTime = resetTime.minus({ days: 1 });
-      }
+      if (now < resetTime) resetTime = resetTime.minus({ days: 1 });
       return resetTime;
     };
 
@@ -363,12 +395,14 @@ export default function currencyRoutes(db) {
         `SELECT last_claim_at FROM daily_rewards WHERE discord_id = $1 FOR UPDATE`,
         [discordId]
       );
-      if (
+
+      const alreadyClaimed =
         rewardRes.rowCount > 0 &&
         DateTime.fromJSDate(rewardRes.rows[0].last_claim_at).setZone(
           TIMEZONE
-        ) >= lastReset
-      ) {
+        ) >= lastReset;
+
+      if (alreadyClaimed) {
         await client.query("ROLLBACK");
 
         const nextReset = lastReset.plus({ days: 1 });
@@ -387,11 +421,11 @@ export default function currencyRoutes(db) {
       );
       await client.query(
         `INSERT INTO daily_rewards (discord_id, last_claim_at)
-       VALUES ($1, $2)
-       ON CONFLICT (discord_id)
-       DO UPDATE SET last_claim_at = EXCLUDED.last_claim_at`,
+         VALUES ($1, $2)
+         ON CONFLICT (discord_id) DO UPDATE SET last_claim_at = EXCLUDED.last_claim_at`,
         [discordId, now.toJSDate()]
       );
+
       await client.query("COMMIT");
 
       const newBalance = currentBal + DAILY_REWARD_AMOUNT;

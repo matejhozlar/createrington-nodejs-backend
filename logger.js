@@ -11,11 +11,23 @@ class DailyFolderLogger {
     this.monitorDateChange();
   }
 
+  /**
+   * Returns the current date in 'YYYY-MM-DD' format (Swedish locale).
+   * @returns {string}
+   */
   getDateString() {
     const now = new Date();
     return now.toLocaleDateString("sv-SE");
   }
 
+  /**
+   * Builds a full path for the log file based on date and filename.
+   * Creates the date-named folder if it doesn't exist.
+   *
+   * @param {string} date - Date string in 'YYYY-MM-DD' format.
+   * @param {string} filename - Log filename (e.g., 'server.log').
+   * @returns {string} Full path to the log file.
+   */
   getLogPathForDate(date, filename) {
     const datedDir = path.join(logDir, date);
     if (!fs.existsSync(datedDir)) {
@@ -24,6 +36,12 @@ class DailyFolderLogger {
     return path.join(datedDir, filename);
   }
 
+  /**
+   * Creates a Winston logger for the given date.
+   *
+   * @param {string} date - Date string used for folder naming.
+   * @returns {winston.Logger} Configured Winston logger instance.
+   */
   createLoggerForDate(date) {
     return winston.createLogger({
       level: "info",
@@ -52,6 +70,11 @@ class DailyFolderLogger {
     });
   }
 
+  /**
+   * Removes log folders older than the specified number of days.
+   *
+   * @param {number} daysToKeep - Number of days to keep logs. Defaults to 7.
+   */
   cleanOldLogFolders(daysToKeep = 7) {
     const cutoff = Date.now() - daysToKeep * 24 * 60 * 60 * 1000;
 
@@ -69,7 +92,7 @@ class DailyFolderLogger {
             if (rmErr) {
               console.log(`Failed to delete old log folder ${folder}:`, rmErr);
             } else {
-              console.log(`Deteted old log folder: ${folder}`);
+              console.log(`Deleted old log folder: ${folder}`);
             }
           });
         }
@@ -77,6 +100,10 @@ class DailyFolderLogger {
     });
   }
 
+  /**
+   * Checks once per minute if the system date has changed.
+   * If it has, rotates the logger and cleans old logs.
+   */
   monitorDateChange() {
     setInterval(() => {
       const newDate = this.getDateString();
@@ -89,6 +116,12 @@ class DailyFolderLogger {
     }, 60 * 1000);
   }
 
+  /**
+   * Safely formats log input into a string.
+   *
+   * @param {any} input - Message or error to format.
+   * @returns {string} Formatted message.
+   */
   formatMessage(input) {
     if (input instanceof Error) {
       return input.stack || input.message;
@@ -103,18 +136,36 @@ class DailyFolderLogger {
     return String(input);
   }
 
+  /**
+   * Logs a message at 'error' level.
+   * @param {any} message - The message or error to log.
+   */
   error(message) {
     this.logger.error(this.formatMessage(message));
   }
 
+  /**
+   * Logs a message at 'warn' level.
+   * @param {any} message - The message to log.
+   */
   warn(message) {
     this.logger.warn(this.formatMessage(message));
   }
 
+  /**
+   * Logs a message at 'info' level.
+   * @param {any} message - The message to log.
+   */
   info(message) {
     this.logger.info(this.formatMessage(message));
   }
 
+  /**
+   * Logs a message at a custom log level.
+   *
+   * @param {string} level - Log level ('debug', 'warn', 'info', etc.)
+   * @param {any} message - The message to log.
+   */
   log(level, message) {
     this.logger.log({ level, message: this.formatMessage(message) });
   }
