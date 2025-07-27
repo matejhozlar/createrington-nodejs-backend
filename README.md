@@ -339,7 +339,7 @@ Since MongoDB is schema-less, you don't strictly need to define schemas, but for
 
 `user_funds`:
 
-```jsonc
+```json
 {
   "uuid": "string (UUID)",
   "name": "string",
@@ -349,7 +349,7 @@ Since MongoDB is schema-less, you don't strictly need to define schemas, but for
 
 `daily_rewards`:
 
-```jsonc
+```json
 {
   "uuid": "string (UUID)", // References user_funds.uuid
   "last_claim_at": "ISODate"
@@ -358,7 +358,7 @@ Since MongoDB is schema-less, you don't strictly need to define schemas, but for
 
 `mob_limit_reached`:
 
-```jsonc
+```json
 {
   "uuid": "string (UUID)", // References user_funds.uuid
   "date_reached": "ISODate" // Should be date-only (no time)
@@ -367,7 +367,7 @@ Since MongoDB is schema-less, you don't strictly need to define schemas, but for
 
 `currency_transactions`:
 
-```jsonc
+```json
 {
   "uuid": "string (UUID)", // The user initiating the action
   "action": "string", // e.g., "deposit", "withdraw", "pay"
