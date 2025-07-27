@@ -31,11 +31,26 @@ export default function currencyRoutes(db) {
       return res.status(400).json({ error: "Missing uuid or name" });
     }
 
-    const token = jwt.sign({ uuid, name }, process.env.JWT_SECRET, {
-      expiresIn: "10m",
-    });
+    try {
+      const now = new Date().toISOString();
 
-    res.json({ token });
+      const stmt = db.prepare(`
+      INSERT INTO user_funds (uuid, name, balance, created_at, updated_at)
+      VALUES (?, ?, 0, ?, ?)
+      ON CONFLICT(uuid) DO UPDATE SET name = excluded.name, updated_at = excluded.updated_at
+    `);
+
+      stmt.run(uuid, name, now, now);
+
+      const token = jwt.sign({ uuid, name }, process.env.JWT_SECRET, {
+        expiresIn: "10m",
+      });
+
+      res.json({ token });
+    } catch (error) {
+      logger.error(`/currency/login error: ${error}`);
+      res.status(500).json({ error: "Internal server error" });
+    }
   });
 
   // Protect all /currency/* routes with auth + IP check

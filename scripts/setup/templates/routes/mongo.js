@@ -36,12 +36,13 @@ export default function currencyRoutes(db) {
     try {
       const userFunds = db.collection("user_funds");
 
-      // Upsert user into the DB (create if missing, update name if changed)
+      const now = new Date();
+
       await userFunds.updateOne(
         { uuid },
         {
-          $set: { name },
-          $setOnInsert: { balance: 0 },
+          $set: { name, updated_at: now },
+          $setOnInsert: { balance: 0, created_at: now },
         },
         { upsert: true }
       );

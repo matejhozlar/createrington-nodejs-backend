@@ -26,18 +26,31 @@ export default function currencyRoutes(db) {
    * @body {string} name - Minecraft username.
    * @returns {string} token
    */
-  router.post("/currency/login", (req, res) => {
+  router.post("/currency/login", async (req, res) => {
     const { uuid, name } = req.body;
 
     if (!uuid || !name) {
       return res.status(400).json({ error: "Missing uuid or name" });
     }
 
-    const token = jwt.sign({ uuid, name }, process.env.JWT_SECRET, {
-      expiresIn: "10m",
-    });
+    try {
+      // Insert or update the user if already exists
+      await db.query(
+        `INSERT INTO user_funds (uuid, name, balance)
+       VALUES ($1, $2, 0)
+       ON CONFLICT (uuid) DO UPDATE SET name = EXCLUDED.name`,
+        [uuid, name]
+      );
 
-    res.json({ token });
+      const token = jwt.sign({ uuid, name }, process.env.JWT_SECRET, {
+        expiresIn: "10m",
+      });
+
+      res.json({ token });
+    } catch (error) {
+      logger.error(`/currency/login error: ${error}`);
+      res.status(500).json({ error: "Internal server error" });
+    }
   });
 
   // Protect all /currency/* routes with auth + IP check
