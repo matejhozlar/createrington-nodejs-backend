@@ -70,29 +70,32 @@ cd createrington-nodejs-backend
 npm install
 ```
 
-### 3. Set Up Environment Variables
+### 3. Run the Setup Wizard
 
-Generate a `.env.example` file listing all required keys:
+Start the interactive setup to configure your database, generate a `.env.example` file, and prepare necessary environment variable files:
 
 ```bash
-npm run env:generate-example
+npm run setup
 ```
 
-Then copy it to create your actual environment config:
+The wizard will:
+
+- Let you choose a database (PostgreSQL, SQLite, MongoDB)
+- Replace backend files according to your DB choice
+- Generate `.env.example`
+- Create `config/env/vars/requiredVars.js` for validation
+
+### 4. Configure Your Environment
+
+Copy the example file and adjust values as needed:
 
 ```bash
 cp .env.example .env
 ```
 
-After configuring your `.env`, scan the codebase and export all required environment variables for validation:
+Edit `.env` with your actual credentials and secrets.
 
-```bash
-npm run env:scan-and-export
-```
-
-This will populate `config/env/vars/requiredVars.js`, which is used to validate your environment variables at server startup.
-
-Example `.env` file:
+Example:
 
 ```ini
 NODE_ENV=development
@@ -102,7 +105,7 @@ JWT_SECRET=your_jwt_secret
 ALLOWED_IPS=127.0.0.1,192.168.1.10
 ```
 
-### 4. Run the Server
+### 5. Start the Server
 
 ```bash
 npm start
@@ -298,12 +301,13 @@ The backend uses a custom Winston logger. Logs are saved in a `logs` directory i
 
 ## Scripts
 
-| Script                         | Description                   |
-| ------------------------------ | ----------------------------- |
-| `npm start`                    | Start the production server   |
-| `npm run dev`                  | Start dev server with nodemon |
-| `npm run env:scan-and-export`  | Generate required .env vars   |
-| `npm run env:generate-example` | Generate .env example         |
+| Script                        | Description                                   |
+| ----------------------------- | --------------------------------------------- |
+| `npm start`                   | Start the production server                   |
+| `npm run dev`                 | Start dev server with nodemon                 |
+| `npm run Setup`               | Setup Wizard                                  |
+| `npm run env-gen`             | Generate required .env vars                   |
+| `npm run env-find <variable>` | Locates env variable in a file based on input |
 
 ---
 
