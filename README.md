@@ -212,7 +212,7 @@ Returns the top 10 richest players, ordered by balance descending.
 [
   { "name": "Player1", "balance": 12345 },
   { "name": "Player2", "balance": 10000 }
-  ...
+  // more players
 ]
 ```
 
