@@ -25,27 +25,27 @@ export function generateDotenvExample(selectedDb) {
     absolute: true,
   });
 
-  const envVars = new Set();
+  const envVars = new Map(); // key -> line or default value
 
   for (const file of allFiles) {
     try {
       const vars = findEnvVarsInFile(file);
-      vars.forEach((v) => envVars.add(v));
+      vars.forEach((v) => {
+        if (!envVars.has(v)) envVars.set(v, `${v}=`);
+      });
     } catch (error) {
       console.warn(`⚠️ Skipping unreadable file ${file}: ${error}`);
     }
   }
 
-  DB_PRESETS[selectedDb].forEach((line) => {
+  // Apply DB presets (overwrite or insert)
+  for (const line of DB_PRESETS[selectedDb]) {
     const [key] = line.split("=");
-    envVars.add(key);
-  });
+    envVars.set(key, line);
+  }
 
-  const sortedVars = Array.from(envVars).sort();
-  const lines = sortedVars.map((v) => {
-    const preset = DB_PRESETS[selectedDb].find((line) => line.startsWith(v));
-    return preset || `${v}=`;
-  });
+  const sortedVars = Array.from(envVars.keys()).sort();
+  const lines = sortedVars.map((key) => envVars.get(key));
 
   fs.writeFileSync(".env.example", lines.join("\n") + "\n");
   console.log(`✅ Generated .env.example for ${selectedDb.toUpperCase()}`);

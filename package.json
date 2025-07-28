@@ -10,7 +10,8 @@
     "dev": "nodemon server.js",
     "setup": "node scripts/setup/index.js",
     "env-gen": "node scripts/env/generateRequiredEnvVars.js",
-    "env-find": "node scripts/env/findEnvUsage.js"
+    "env-find": "node scripts/env/findEnvUsage.js",
+    "env-fill": "node scripts/setup/promptFillEnv.js"
   },
   "repository": {
     "type": "git",
