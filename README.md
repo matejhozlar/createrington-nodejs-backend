@@ -113,6 +113,31 @@ ALLOWED_IPS=127.0.0.1,192.168.1.10
 npm start
 ```
 
+## (Optional) Docker Setup
+
+Currently works only for **PostgreSQL** preset
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/matejhozlar/createrington-nodejs-backend.git
+cd createrington-nodejs-backend
+```
+
+### 2. Build the Docker Image
+
+```bash
+docker build -t setup .
+```
+
+### 3. Run the Docker Setup
+
+The Docker will guide you through a setup that will run the server, you will need to fill all important information the Docker asks for.
+
+```bash
+docker run -it -p 5000:5000 setup
+```
+
 ---
 
 ## Project Structure
