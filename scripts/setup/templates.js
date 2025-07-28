@@ -19,7 +19,7 @@ export function applyDatabaseTemplate(selectedDb) {
     },
     {
       src: `scripts/setup/templates/utils/${selectedDb}.js`,
-      dest: `app/utils/logTransactions.js`,
+      dest: `app/utils/currency/logTransactions.js`,
     },
   ];
 
